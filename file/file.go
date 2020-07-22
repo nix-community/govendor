@@ -34,7 +34,7 @@ dep:
 }
 
 // CopyModuleDependencies copies module level dependencies transitively.
-func CopyModuleDependencies(deps []Dep) {
+func CopyModuleDependencies(mod GoMod, deps []Dep) {
 	modFile := cli.ReadModFile(vendorDir())
 	deleteVendorDir()
 
@@ -42,6 +42,18 @@ func CopyModuleDependencies(deps []Dep) {
 		fmt.Fprintf(output.Stdout, "vend: copying %s (%s)\n", d.Path, d.Version)
 		dest := path.Join(vendorDir(), d.Path)
 		copy(d.Dir, dest)
+	}
+
+	for _, d := range mod.Replace {
+		if d.Old.Path != d.New.Path {
+			src := path.Join(vendorDir(), d.New.Path)
+			// Sometimes this is a filepath (abs or relative) rather than a URL.
+			if _, err := os.Stat(d.New.Path); err == nil {
+				src = d.New.Path
+			}
+			dest := path.Join(vendorDir(), d.Old.Path)
+			copy(src, dest)
+		}
 	}
 
 	SaveReport(modFile)
