@@ -12,7 +12,7 @@ import (
 // UpdateModule makes sure the module is updated ready to vendor the
 // dependencies.
 func UpdateModule() {
-	var commands = []string{"tidy", "download", "vendor"}
+	var commands = []string{"download", "vendor"}
 
 	for _, command := range commands {
 		cmd := exec.Command("go", "mod", command)
